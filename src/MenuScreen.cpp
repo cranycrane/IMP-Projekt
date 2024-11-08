@@ -7,7 +7,6 @@ void MenuScreen::render() {
 display.clearDisplay();
 switch (menuState) {
     case MAIN_MENU:
-        Serial.println("ukazuju menu csreen");
         showMainMenu();
         break;
     case WEATHER_INFO:
@@ -24,8 +23,8 @@ display.display();
 }
 
 void MenuScreen::handleGesture(uint8_t gesture) {
-    if (menuState == SETTINGS) {
-        settingsScreen->handleGesture(gesture);  // Předání gest do SettingsScreen
+    if(menuState == SETTINGS) {
+        settingsScreen->handleGesture(gesture);
     }
 
     switch (gesture) {
@@ -60,8 +59,12 @@ void MenuScreen::handleGesture(uint8_t gesture) {
             }
             break;
 
-        case APDS9960_LEFT:
-            if (menuState != MAIN_MENU) {
+        case APDS9960_LEFT: 
+            if (settingsScreen->settingsState == SettingsScreen::ADJUST_INTERVAL) {
+                settingsScreen->settingsState = SettingsScreen::VIEW_SETTINGS;
+                Serial.println("settings");
+            } else {
+                Serial.println("menu");
                 menuState = MAIN_MENU;
             }
             break;
@@ -90,6 +93,7 @@ void MenuScreen::handleGesture(uint8_t gesture) {
 }
 
 void MenuScreen::showMainMenu() {
+
     display.clearDisplay();
     display.setCursor(0, 0);
     display.setTextSize(1);

@@ -51,7 +51,7 @@ void IRAM_ATTR gestureISR() {
 void initDisplay() {
     Wire.begin(OLED_SDA_PIN, OLED_SCL_PIN);
     if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-        Serial.println("Nepodařilo se inicializovat OLED displej");
+        Serial.println("Could not initialize OLED displej");
         while (true);
     }
 }
@@ -88,15 +88,15 @@ void initGestureSensor() {
     attachInterrupt(digitalPinToInterrupt(INT_PIN), gestureISR, FALLING);
 
     if (!apds.begin(DEFAULT_ITIME, DEFAULT_GAIN, APDS9960_ADDR, &Wire1)) {
-        Serial.println("Nepodarilo se inicializovat APDS-9960");
-        display.println("Chyba inicializace!");
+        Serial.println("Could not initialize APDS-9960");
+        display.println("Error initializing!");
         display.display();
         while (1);
     } else {
-        Serial.println("APDS-9960 inicializovan.");
+        Serial.println("APDS-9960 initialized.");
     }
     apds.enableGesture(true);
-    Serial.println("Detekce gest aktivována.");
+    Serial.println("Detection gestures activated.");
 }
 
 void displayMessage(String message) {
@@ -109,30 +109,29 @@ void displayMessage(String message) {
 
 void connectToWiFi() {
   WiFi.begin(ssid, password);
-  Serial.print("Připojování k Wi-Fi");
+  Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("\nPřipojeno k Wi-Fi");
+  Serial.println("\nConnected to Wi-Fi");
 }
 
 void connectToMQTT() {
   while (!client.connected()) {
-    Serial.print("Připojování k MQTT brokeru...");
+    Serial.print("Connecting MQTT broker...");
     String clientId = "ESP32Client-" + String(random(0xffff), HEX);
 
     if (client.connect(clientId.c_str())) {
-      Serial.println("Připojeno k MQTT brokeru!");
       if (client.subscribe("home/response/weather")) {
-        Serial.println("Přihlášeno k odběru: home/response/weather");
+        Serial.println("Subscribing: home/response/weather");
       } else {
-        Serial.println("Nepodařilo se přihlásit k odběru: home/response/weather");
+        Serial.println("Could not subscribe: home/response/weather");
       }
     } else {
-      Serial.print("Nepodařilo se připojit, chybový kód = ");
+      Serial.print("Could not connect to MQTT, error code=");
       Serial.print(client.state());
-      Serial.println(" Znovu zkouším za 5 sekund...");
+      Serial.println(" Retrying in 5 seconds...");
       delay(5000);
     }
   }
@@ -145,13 +144,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
 
     if (String(topic) == "home/response/weather") {
-        Serial.println("Přijatá data o počasí: " + message);
+        Serial.println("Got weather data: " + message);
 
         DynamicJsonDocument doc(512);
         DeserializationError error = deserializeJson(doc, message);
 
         if (error) {
-            Serial.print("Chyba při parsování JSON: ");
+            Serial.print("Error parsing JSON JSON: ");
             Serial.println(error.c_str());
             return;
         }
@@ -202,12 +201,12 @@ String getDateData() {
       Serial.println(payload);
       return payload;
     } else {
-      Serial.println("Chyba při volání API svátků");
+      Serial.println("Error calling on API");
       return "";
     }
     http.end();
   } else {
-    Serial.println("Wi-Fi není připojena");
+    Serial.println("Wi-Fi not connected");
     return "";
   }
 }
@@ -248,7 +247,7 @@ void loop() {
   client.loop();
   if (apds.gestureValid()) {
     uint8_t gesture = apds.readGesture();
-    menuScreen->handleGesture(gesture);  // Předání gesta do MenuScreen
-    delay(500);  // Debounce pro gesta
+    menuScreen->handleGesture(gesture);  
+    delay(500);
   }
 }

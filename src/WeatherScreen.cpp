@@ -78,14 +78,13 @@ void WeatherScreen::updateData(ScreenData* data) {
 void WeatherScreen::drawIcon(const String& icon, int y) {
     Serial.println("Vykresluju ikonu: " + icon);
 // todo z mqtt vracet sun/cloud/fog/rain
-    if (icon == "01d" || icon == "01n") {
+    if (icon == "sun") {
         display.drawBitmap(48, y, icon_sunny, 32, 32, SSD1306_WHITE);
-    } else if (icon == "02d" || icon == "02n" || icon == "03d" || icon == "03n") {
+    } else if (icon == "cloud") {
         display.drawBitmap(48, y, epd_bitmap_cloudy, 32, 32, SSD1306_WHITE);
-    } else if (icon == "10d" || icon == "10n") {
+    } else if (icon == "rain") {
         display.drawBitmap(48, y, epd_bitmap_heavy_rain, 32, 32, SSD1306_WHITE);
-    } else if (icon == "50d" || icon == "50n") {
+    } else if (icon == "fog") {
         display.drawBitmap(48, y, epd_bitmap_fog, 32, 32, SSD1306_WHITE);
     }
-    // Přidejte další podmínky pro další ikony
 }

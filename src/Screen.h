@@ -8,16 +8,13 @@ class Screen {
     virtual void render() = 0;
     void updateData(ScreenData* data);
     
-    // Přidání základních funkcí posunu
     void scrollUp();
     void scrollDown();
-    
-    // Virtuální destruktor
-    virtual ~Screen() {}
+  
 
   protected:
-    int scrollOffset = 0;  // Uchovává aktuální posun na obrazovce
-    const int lineHeight = 8;  // Výška jednoho řádku, použijte podle potřeby
+    int scrollOffset = 0;  
+    const int lineHeight = 8;
     int maxScrollOffset = 0; 
 };
 

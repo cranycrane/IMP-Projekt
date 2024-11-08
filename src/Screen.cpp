@@ -2,13 +2,13 @@
 
 void Screen::scrollUp() {
     if (scrollOffset > 0) {
-        scrollOffset--;  // Posun nahoru, pokud je možné
+        scrollOffset--;
     }
 }
 
 void Screen::scrollDown() {
     if (scrollOffset < maxScrollOffset) {
-        scrollOffset++;  // Posun dolů, pokud je možné
+        scrollOffset++;
     }
 }
 

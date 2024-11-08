@@ -18,11 +18,15 @@ class SettingsScreen : public Screen {
     WeatherSettings getSettings() const;   
     void sendSettings();
 
+    enum SettingsState { VIEW_SETTINGS, ADJUST_INTERVAL };
+    SettingsState settingsState = VIEW_SETTINGS;
   private:
+
     Adafruit_SSD1306& display;
     WeatherSettings weatherSettings;
     int selectedOption = 0;                
-    const int optionCount = 5;             
+    const int optionCount = 6;  
+    int updateInterval = 5;           
 };
 
 #endif

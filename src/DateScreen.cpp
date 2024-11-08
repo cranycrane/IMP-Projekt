@@ -30,13 +30,12 @@ void DateScreen::updateData(ScreenData* data) {
 
 String DateScreen::convertDateFormat(const String& date) {
     if (date.length() != 10) {
-        return "Nespravny format";  // Vrátí chybovou zprávu, pokud formát není očekávaný
+        return "Wrong format";
     }
 
     String year = date.substring(0, 4);
     String month = date.substring(5, 7);
     String day = date.substring(8, 10);
 
-    // Sestavení nového formátu "D.M.YYYY"
     return day + "." + month + "." + year;
 }

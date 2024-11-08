@@ -10,7 +10,6 @@ void SettingsScreen::render() {
 
     display.println("Nastaveni pocasi:");
     
-    // Zobrazení možností s indikátorem vybrané možnosti
     display.print("1. Teplota: ");
     display.println(weatherSettings.showTemperature ? "ANO" : "NE");
     display.print("2. Vlhkost: ");
@@ -22,40 +21,57 @@ void SettingsScreen::render() {
     display.print("5. Zapad slunce: ");
     display.println(weatherSettings.showSunset ? "ANO" : "NE");
 
-    // Zvýraznění aktuálně vybrané možnosti
-    display.setCursor(0, selectedOption * lineHeight + 10);  // Offset na základě výběru
+    int intervalCursorX = (settingsState == ADJUST_INTERVAL && selectedOption == 5) ? 10 : 0;
+    display.setCursor(intervalCursorX, 5 * lineHeight + 10); 
+
+    display.print("6. Interval: ");
+    display.print(updateInterval);
+    display.println(" min");
+
+    display.setCursor(0, selectedOption * lineHeight + 10);  
     display.print("->");
-    
+
     display.display();
 }
 
+
 void SettingsScreen::handleGesture(uint8_t gesture) {
-    switch (gesture) {
-        case APDS9960_UP:
-            // Přechod na předchozí možnost
-            selectedOption = (selectedOption - 1 + optionCount) % optionCount;
-            break;
-        case APDS9960_DOWN:
-            // Přechod na další možnost
-            selectedOption = (selectedOption + 1) % optionCount;
-            break;
-        case APDS9960_RIGHT:
-            Serial.println("Davam right");
-            // Přepnutí hodnoty vybrané možnosti
-            switch (selectedOption) {
-                case 0: weatherSettings.showTemperature = !weatherSettings.showTemperature; break;
-                case 1: weatherSettings.showHumidity = !weatherSettings.showHumidity; break;
-                case 2: weatherSettings.showWindSpeed = !weatherSettings.showWindSpeed; break;
-                case 3: weatherSettings.showSunrise = !weatherSettings.showSunrise; break;
-                case 4: weatherSettings.showSunset = !weatherSettings.showSunset; break;
-            }
-            break;
-        case APDS9960_LEFT:
-        Serial.println("Odesilam sett");
-            sendSettings();
-            break;
+    if (settingsState == VIEW_SETTINGS) {
+        switch (gesture) {
+            case APDS9960_UP:
+                selectedOption = (selectedOption - 1 + optionCount) % optionCount;
+                break;
+            case APDS9960_DOWN:
+                selectedOption = (selectedOption + 1) % optionCount;
+                break;
+            case APDS9960_RIGHT:
+                if (selectedOption == 5) { 
+                    settingsState = ADJUST_INTERVAL;
+                } else {
+                    switch (selectedOption) {
+                        case 0: weatherSettings.showTemperature = !weatherSettings.showTemperature; break;
+                        case 1: weatherSettings.showHumidity = !weatherSettings.showHumidity; break;
+                        case 2: weatherSettings.showWindSpeed = !weatherSettings.showWindSpeed; break;
+                        case 3: weatherSettings.showSunrise = !weatherSettings.showSunrise; break;
+                        case 4: weatherSettings.showSunset = !weatherSettings.showSunset; break;
+                    }
+                }
+                break;
+            case APDS9960_LEFT:
+        Serial.println("Jdu taky main");
+                sendSettings();
+                break;
+        }
+    } else if (settingsState == ADJUST_INTERVAL) {
+        if (gesture == APDS9960_UP && updateInterval < 60) {
+            updateInterval += 5;
+        } else if (gesture == APDS9960_DOWN && updateInterval > 5) {
+            updateInterval -= 5;
+        } else if (gesture == APDS9960_LEFT) { 
+            sendSettings(); 
+        }
     }
-    render();  // Aktualizace obrazovky po změně
+    render();
 }
 
 void SettingsScreen::sendSettings() {
@@ -66,15 +82,16 @@ void SettingsScreen::sendSettings() {
         doc["showWindSpeed"] = weatherSettings.showWindSpeed;
         doc["showSunrise"] = weatherSettings.showSunrise;
         doc["showSunset"] = weatherSettings.showSunset;
+        doc["updateInterval"] = updateInterval;
 
         char jsonBuffer[256];
         serializeJson(doc, jsonBuffer);
 
         client.publish("home/request/weather", jsonBuffer);
-        Serial.println("MQTT zpráva odeslána: ");
+        Serial.println("Send MQTT message: ");
         Serial.println(jsonBuffer);
     } else {
-        Serial.println("MQTT není připojen, zpráva nebyla odeslána.");
+        Serial.println("MQTT not connected.");
     }
 }
 
