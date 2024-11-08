@@ -12,15 +12,31 @@ void DateScreen::render() {
 
     display.print("Dnes ma svatek ");
     display.println(currentData.getHolidayName());
+
+    String formattedDate = convertDateFormat(currentData.getDate());  // Převod formátu
     display.print("Datum: ");
-    display.print(currentData.getDate());
+    display.println(formattedDate);
 
     display.display();
 }
+
 
 void DateScreen::updateData(ScreenData* data) {
     if (data->getType() == ScreenData::DATE) {  
         DateData* dateData = static_cast<DateData*>(data);
         currentData = *dateData;
     }
+}
+
+String DateScreen::convertDateFormat(const String& date) {
+    if (date.length() != 10) {
+        return "Nespravny format";  // Vrátí chybovou zprávu, pokud formát není očekávaný
+    }
+
+    String year = date.substring(0, 4);
+    String month = date.substring(5, 7);
+    String day = date.substring(8, 10);
+
+    // Sestavení nového formátu "D.M.YYYY"
+    return day + "." + month + "." + year;
 }

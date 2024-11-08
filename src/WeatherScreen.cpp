@@ -2,43 +2,90 @@
 #include "WeatherData.h"
 #include "Icons.h"
 
-WeatherScreen::WeatherScreen(Adafruit_SSD1306& disp) : display(disp) {}
+WeatherScreen::WeatherScreen(Adafruit_SSD1306& disp) : display(disp) {
+    maxScrollOffset = 2;
+}
 
 void WeatherScreen::render() {
     display.clearDisplay();
-    display.setCursor(0, 46);
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
 
-    display.print("Pocasi: ");
-    display.println(currentData.getCondition());
-    display.print("Teplota: ");
-    display.print(currentData.getTemperature());
-    display.println(" C");
+    int y = 32 - (scrollOffset * lineHeight);  
+    const int iconHeight = 32;
 
-    drawIcon(currentData.getIcon());
+    if (currentData->icon != "" && y <= iconHeight) {
+        drawIcon(currentData->icon, y - 32); 
+    }
+
+    if (!isnan(currentData->temperature)) {
+        display.setCursor(0, y);
+        display.print("Teplota: ");
+        display.print(currentData->temperature);
+        display.println(" C");
+        y += lineHeight;
+    }
+
+    if (currentData->condition != "") {
+        display.setCursor(0, y);
+        display.print("Stav: ");
+        display.println(currentData->condition);
+        y += lineHeight;
+    }
+
+    if (!isnan(currentData->humidity)) {
+        display.setCursor(0, y);
+        display.print("Vlhkost: ");
+        display.print(currentData->humidity);
+        display.println("%");
+        y += lineHeight;
+    }
+
+    if (!isnan(currentData->windSpeed)) {
+        display.setCursor(0, y);
+        display.print("Vitr: ");
+        display.print(currentData->windSpeed);
+        display.println(" m/s");
+        y += lineHeight;
+    }
+
+    if (currentData->sunrise != "") {
+        display.setCursor(0, y);
+        display.print("Vychod slunce: ");
+        display.println(currentData->sunrise);
+        y += lineHeight;
+    }
+
+    if (currentData->sunset != "") {
+        display.setCursor(0, y);
+        display.print("Zapad slunce: ");
+        display.println(currentData->sunset);
+        y += lineHeight;
+    }
+
     display.display();
 }
 
+
+// todo bude stacit setData nebo v konstruktoru, protoze predavam pres odkaz
 void WeatherScreen::updateData(ScreenData* data) {
     if (data->getType() == ScreenData::WEATHER) {  
         WeatherData* weatherData = static_cast<WeatherData*>(data);
-        currentData = *weatherData;
+        currentData = weatherData;
     }
 }
 
-void WeatherScreen::drawIcon(const String& icon) {
+void WeatherScreen::drawIcon(const String& icon, int y) {
     Serial.println("Vykresluju ikonu: " + icon);
-
-    // Podmínky pro vykreslení ikony na základě kódu ikony
+// todo z mqtt vracet sun/cloud/fog/rain
     if (icon == "01d" || icon == "01n") {
-        display.drawBitmap(48, 0, icon_sunny, 32, 32, SSD1306_WHITE);
+        display.drawBitmap(48, y, icon_sunny, 32, 32, SSD1306_WHITE);
     } else if (icon == "02d" || icon == "02n" || icon == "03d" || icon == "03n") {
-        display.drawBitmap(48, 0, epd_bitmap_cloudy, 32, 32, SSD1306_WHITE);
+        display.drawBitmap(48, y, epd_bitmap_cloudy, 32, 32, SSD1306_WHITE);
     } else if (icon == "10d" || icon == "10n") {
-        display.drawBitmap(48, 0, epd_bitmap_heavy_rain, 32, 32, SSD1306_WHITE);
+        display.drawBitmap(48, y, epd_bitmap_heavy_rain, 32, 32, SSD1306_WHITE);
     } else if (icon == "50d" || icon == "50n") {
-        display.drawBitmap(48, 0, epd_bitmap_fog, 32, 32, SSD1306_WHITE);
+        display.drawBitmap(48, y, epd_bitmap_fog, 32, 32, SSD1306_WHITE);
     }
     // Přidejte další podmínky pro další ikony
 }

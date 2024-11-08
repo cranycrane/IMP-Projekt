@@ -1,28 +1,40 @@
 #ifndef MENUSCREEN_H
 #define MENUSCREEN_H
 
+#include <Adafruit_APDS9960.h>
 #include <Adafruit_SSD1306.h>
 #include "Screen.h"
+#include "DateScreen.h"
+#include "WeatherScreen.h"
+#include "SettingsScreen.h"
 
 class MenuScreen : public Screen {
   public:
     MenuScreen(Adafruit_SSD1306& display);
+
+    DateScreen* dateScreen;
+    WeatherScreen* weatherScreen;
+    SettingsScreen* settingsScreen;
+
     void render() override;
-    void updateData(ScreenData* data) override;
-    void nextMenuItem(); // Přejde na další položku
-    void previousMenuItem(); // Přejde na předchozí položku
-    void selectItem(); // Potvrdí výběr položky a přepne do podmenu nebo spustí akci
-    void backToMainMenu(); // Vrátí se zpět do hlavního menu
+    void handleGesture(uint8_t gesture);
 
   private:
-    enum MenuState { MAIN_MENU, INFO_MENU, ACTION_MENU, SETTINGS_MENU };
-    MenuState menuState = MAIN_MENU; // Aktuální stav menu
+    enum MenuState {
+        MAIN_MENU,
+        WEATHER_INFO,
+        DATE_INFO,
+        SETTINGS
+    };
 
     Adafruit_SSD1306& display;
-    int menuIndex;
-    const char* mainMenu[3] = {"Informace", "Akce", "Nastavení"};
-    const char* infoMenu[2] = {"Počasí", "Datum"};
-    int menuItemsCount = 3;
+
+    MenuState menuState;
+    int selectedSettingValue;
+    int selectedMenuIndex = 0;
+
+    void showSettingsMenu();
+    void showMainMenu();
 };
 
 #endif

@@ -1,21 +1,15 @@
 #include "WeatherData.h"
 
-WeatherData::WeatherData() : temperature(0), condition("Unknown"), icon("01d") {}
+WeatherData::WeatherData()
+    : temperature(NAN), humidity(NAN), windSpeed(NAN), condition(""), icon(""),
+      sunrise(""), sunset("") {}
 
-void WeatherData::updateWeather(float temp, const String& cond, const String& iconCode) {
+void WeatherData::update(float temp, const String& cond, const String& iconCode, float hum, float wind, const String& sunRiseTime, const String& sunSetTime) {
     temperature = temp;
     condition = cond;
     icon = iconCode;
-}
-
-float WeatherData::getTemperature() const {
-    return temperature;
-}
-
-String WeatherData::getCondition() const {
-    return condition;
-}
-
-String WeatherData::getIcon() const {
-    return icon;
+    humidity = hum;
+    windSpeed = wind;
+    sunrise = sunRiseTime;
+    sunset = sunSetTime;
 }

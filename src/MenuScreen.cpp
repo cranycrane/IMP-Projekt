@@ -1,74 +1,119 @@
 #include "MenuScreen.h"
 
-MenuScreen::MenuScreen(Adafruit_SSD1306& disp) : display(disp), menuIndex(0) {}
+MenuScreen::MenuScreen(Adafruit_SSD1306& disp) 
+    : display(disp), menuState(MAIN_MENU), selectedSettingValue(0) {}
 
 void MenuScreen::render() {
+display.clearDisplay();
+switch (menuState) {
+    case MAIN_MENU:
+        Serial.println("ukazuju menu csreen");
+        showMainMenu();
+        break;
+    case WEATHER_INFO:
+        weatherScreen->render();
+        break;
+    case DATE_INFO:
+        dateScreen->render();
+        break;
+    case SETTINGS:
+        settingsScreen->render();
+        break;
+}
+display.display();
+}
+
+void MenuScreen::handleGesture(uint8_t gesture) {
+    if (menuState == SETTINGS) {
+        settingsScreen->handleGesture(gesture);  // Předání gest do SettingsScreen
+    }
+
+    switch (gesture) {
+        case APDS9960_UP:
+            Serial.println("NAHORU");
+            if (menuState == MAIN_MENU) {
+                if (selectedMenuIndex == 0) {
+                    selectedMenuIndex = 2; 
+                } else {
+                    selectedMenuIndex--; 
+                }
+            } else if (menuState == SETTINGS) {
+                selectedSettingValue += 1;
+            } else if (menuState == WEATHER_INFO) {
+                // todo get back Up after new sensor
+                weatherScreen->scrollDown();
+            }
+            break;
+
+        case APDS9960_DOWN:
+            Serial.println("DOLU");
+            if (menuState == MAIN_MENU) {
+                if (selectedMenuIndex == 2) {
+                    selectedMenuIndex = 0;
+                } else {
+                    selectedMenuIndex++;  
+                }
+            } else if (menuState == SETTINGS) {
+                selectedSettingValue -= 1;  
+            } else if (menuState == WEATHER_INFO) {
+                weatherScreen->scrollDown();
+            }
+            break;
+
+        case APDS9960_LEFT:
+            if (menuState != MAIN_MENU) {
+                menuState = MAIN_MENU;
+            }
+            break;
+
+        case APDS9960_RIGHT:
+            if (menuState == MAIN_MENU) {
+                switch (selectedMenuIndex) {
+                    case 0:
+                        menuState = WEATHER_INFO;
+                        break;
+                    case 1:
+                        menuState = DATE_INFO;
+                        break;
+                    case 2:
+                        menuState = SETTINGS;
+                        break;
+                }
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    render(); 
+}
+
+void MenuScreen::showMainMenu() {
     display.clearDisplay();
     display.setCursor(0, 0);
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
+    display.println("Menu:");
 
-    if (menuState == MAIN_MENU) {
-        display.println("Hlavní Menu:");
-        display.println(mainMenu[menuIndex]);
-    } else if (menuState == INFO_MENU) {
-        display.println("Info Menu:");
-        display.println(infoMenu[menuIndex]);
-    } else if (menuState == ACTION_MENU) {
-        display.println("Spousteni akce...");
-        display.println("Obnovit data...");
-        // Tady může být kód pro akci, například obnovení dat
-    } else if (menuState == SETTINGS_MENU) {
-        display.println("Nastavení teploty:");
-        display.println("Nastavená hodnota...");
-        // Tady může být logika pro nastavování hodnot
-    }
-    
+    display.setCursor(0, 10);
+    display.print(selectedMenuIndex == 0 ? "> " : "  ");
+    display.println("1. Pocasi");
+
+    display.setCursor(0, 20);
+    display.print(selectedMenuIndex == 1 ? "> " : "  ");
+    display.println("2. Datum");
+
+    display.setCursor(0, 30);
+    display.print(selectedMenuIndex == 2 ? "> " : "  ");
+    display.println("3. Nastaveni");
+
     display.display();
 }
 
-void MenuScreen::nextMenuItem() {
-    if (menuState == MAIN_MENU) {
-        menuIndex = (menuIndex + 1) % menuItemsCount;
-    } else if (menuState == INFO_MENU) {
-        menuIndex = (menuIndex + 1) % 2; // Dvě položky v INFO_MENU
-    }
-}
-
-void MenuScreen::previousMenuItem() {
-    if (menuState == MAIN_MENU) {
-        menuIndex = (menuIndex - 1 + menuItemsCount) % menuItemsCount;
-    } else if (menuState == INFO_MENU) {
-        menuIndex = (menuIndex - 1 + 2) % 2;
-    }
-}
-
-void MenuScreen::selectItem() {
-    if (menuState == MAIN_MENU) {
-        switch (menuIndex) {
-            case 0: // Informace
-                menuState = INFO_MENU;
-                menuIndex = 0;
-                break;
-            case 1: // Akce
-                menuState = ACTION_MENU;
-                // Tady můžete spustit akci, například volání funkce na obnovu dat
-                break;
-            case 2: // Nastavení
-                menuState = SETTINGS_MENU;
-                // Tady můžete nastavit teplotu nebo jinou hodnotu
-                break;
-        }
-    } else if (menuState == INFO_MENU) {
-        // Zde lze zobrazit informace, například počasí nebo datum
-    }
-}
-
-void MenuScreen::backToMainMenu() {
-    menuState = MAIN_MENU;
-    menuIndex = 0;
-}
-
-void MenuScreen::updateData(ScreenData* data) {
-    return;
+void MenuScreen::showSettingsMenu() {
+    display.setCursor(0, 0);
+    display.println("Nastaveni:");
+    display.print("Prahová hodnota: ");
+    display.println(selectedSettingValue);
 }

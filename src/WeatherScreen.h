@@ -9,13 +9,13 @@ class WeatherScreen : public Screen {
   public:
     WeatherScreen(Adafruit_SSD1306& display);
     void render() override;          
-    void updateData(ScreenData* data) override;
+    void updateData(ScreenData* data);
 
   private:
     Adafruit_SSD1306& display;
-    WeatherData currentData;     
+    WeatherData* currentData;     
 
-    void drawIcon(const String& icon);
+    void drawIcon(const String& icon, int y);
 };
 
 #endif

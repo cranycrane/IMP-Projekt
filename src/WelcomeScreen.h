@@ -8,7 +8,7 @@
 class WelcomeScreen : public Screen {
   public:
     WelcomeScreen(Adafruit_SSD1306& display);
-    void updateData(ScreenData* data) override;
+    void updateData(ScreenData* data);
     void render() override;          
 
   private:
