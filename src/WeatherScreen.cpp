@@ -67,7 +67,6 @@ void WeatherScreen::render() {
 }
 
 
-// todo bude stacit setData nebo v konstruktoru, protoze predavam pres odkaz
 void WeatherScreen::updateData(ScreenData* data) {
     if (data->getType() == ScreenData::WEATHER) {  
         WeatherData* weatherData = static_cast<WeatherData*>(data);
@@ -77,7 +76,6 @@ void WeatherScreen::updateData(ScreenData* data) {
 
 void WeatherScreen::drawIcon(const String& icon, int y) {
     Serial.println("Vykresluju ikonu: " + icon);
-// todo z mqtt vracet sun/cloud/fog/rain
     if (icon == "sun") {
         display.drawBitmap(48, y, icon_sunny, 32, 32, SSD1306_WHITE);
     } else if (icon == "cloud") {

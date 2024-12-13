@@ -29,7 +29,6 @@ void MenuScreen::handleGesture(uint8_t gesture) {
 
     switch (gesture) {
         case APDS9960_UP:
-            Serial.println("NAHORU");
             if (menuState == MAIN_MENU) {
                 if (selectedMenuIndex == 0) {
                     selectedMenuIndex = 2; 
@@ -45,7 +44,6 @@ void MenuScreen::handleGesture(uint8_t gesture) {
             break;
 
         case APDS9960_DOWN:
-            Serial.println("DOLU");
             if (menuState == MAIN_MENU) {
                 if (selectedMenuIndex == 2) {
                     selectedMenuIndex = 0;
@@ -62,9 +60,7 @@ void MenuScreen::handleGesture(uint8_t gesture) {
         case APDS9960_LEFT: 
             if (settingsScreen->settingsState == SettingsScreen::ADJUST_INTERVAL) {
                 settingsScreen->settingsState = SettingsScreen::VIEW_SETTINGS;
-                Serial.println("settings");
             } else {
-                Serial.println("menu");
                 menuState = MAIN_MENU;
             }
             break;

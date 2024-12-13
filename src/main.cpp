@@ -24,11 +24,11 @@
 #define GESTURE_SCL_PIN 26
 #define INT_PIN 12 
 
+// zde nastavit jmeno a heslo k Wi-Fi
+const char* ssid = "WIFI-SSD"; 
+const char* password = "WiFi-Password"; 
 
-const char* ssid = "MERCUSYS_B0F7"; 
-const char* password = "Pipik2024"; 
-
-const char* mqtt_server = "test.mosquitto.org";
+const char* mqtt_broker = "test.mosquitto.org";
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 Adafruit_APDS9960 apds;
@@ -137,6 +137,7 @@ void connectToMQTT() {
   }
 }
 
+// deserializace dat z mqtt meteostanice
 void callback(char* topic, byte* payload, unsigned int length) {
     String message;
     for (int i = 0; i < length; i++) {
@@ -168,6 +169,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
 }
 
+// parosvani dat ohledne datumu a svatku
 DateData* parseDateData(String payload) {
   DynamicJsonDocument doc(1024);
   DeserializationError error = deserializeJson(doc, payload);
@@ -188,7 +190,7 @@ DateData* parseDateData(String payload) {
   return nameDayData;
 }
 
-
+// api dotaz pro ziskani datumu a svatku
 String getDateData() {
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
@@ -218,12 +220,13 @@ void updateDateData() {
 }
 
 void initMQTT() {
-    client.setServer(mqtt_server, 1883);
+    client.setServer(mqtt_broker, 1883);
     client.setCallback(callback);
     connectToMQTT();
     settingsScreen->client = client;
 }
 
+// inicializace periferii, pripojeni k wifi, subscribe mqtt
 void setup() {
     Serial.begin(115200);
 
@@ -239,7 +242,7 @@ void setup() {
     menuScreen->render();
 }
 
-
+// hlavni smycka programu
 void loop() {
   if (!client.connected()) {
     connectToMQTT();
