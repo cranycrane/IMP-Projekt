@@ -6,3 +6,6 @@ Tento projekt byl vypracován na FIT VUT v Brně v rámci předmětu IMP - Mikro
 ## Struktura projektu
 - dokumentace.pdf - dokumentace projektu, spolu s odkazem na demonstrující video
 - src/* - zdrojové soubory
+
+## Výsledek
+14/14 bodů
